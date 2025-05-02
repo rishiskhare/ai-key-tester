@@ -1,19 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Info, Eye, EyeOff } from "lucide-react"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 import { generateText } from "ai"
 import { cn } from "@/lib/utils"
 
 import { createOpenAI } from "@ai-sdk/openai"
 import { createAnthropic } from "@ai-sdk/anthropic"
-import { google } from "@ai-sdk/google"
+import { createGoogleGenerativeAI } from "@ai-sdk/google"
 
 const OpenAILogo = () => (
   <img
@@ -45,6 +45,16 @@ const AnthropicLogo = () => (
   />
 )
 
+const HuggingFaceLogo = () => (
+  <img
+    src="https://cdn-lfs.hf.co/repos/96/a2/96a2c8468c1546e660ac2609e49404b8588fcf5a748761fa72c154b2836b4c83/942cad1ccda905ac5a659dfd2d78b344fccfb84a8a3ac3721e08f488205638a0?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27hf-logo.svg%3B+filename%3D%22hf-logo.svg%22%3B&response-content-type=image%2Fsvg%2Bxml&Expires=1746221527&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0NjIyMTUyN319LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9yZXBvcy85Ni9hMi85NmEyYzg0NjhjMTU0NmU2NjBhYzI2MDllNDk0MDRiODU4OGZjZjVhNzQ4NzYxZmE3MmMxNTRiMjgzNmI0YzgzLzk0MmNhZDFjY2RhOTA1YWM1YTY1OWRmZDJkNzhiMzQ0ZmNjZmI4NGE4YTNhYzM3MjFlMDhmNDg4MjA1NjM4YTA%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qJnJlc3BvbnNlLWNvbnRlbnQtdHlwZT0qIn1dfQ__&Signature=pUNwgju6Ye7Lcq2qSA-hFii-AD2uOBXu1x6FsOatURl8%7EVd5k4PxOLR3-rdC%7EGzTuA8wEdBqvCRnbbS0NFLCY6TImn29aMXvASOt1jvj8AoJkM1jB6TZc4qfaqXIsXIa7k3xCSmb7LE8rK2YcN76pV36j1q3YbeMCvMLS4ZX7mKZWGGWw2uanbm3dzVKX4P4eVRapMMck%7E5D%7E6VebUr8SHb6qViATRHSQl1zd%7EhcIq18icXroh3Fb2wy-z0qZwlho4JokzlBvR1NvONACwBOrmfSUXi6aveBQF8r1DVv7oWNnPIYhBL-EwctFo6CXM5NK3CoyfpTefISUl5V13tSVA__&Key-Pair-Id=K3RPWS32NSSJCE"
+    alt="HuggingFace Logo"
+    width={16}
+    height={16}
+    className="mr-2 flex-shrink-0"
+  />
+)
+
 export default function AIKeyTester() {
   const [provider, setProvider] = useState("openai")
   const [apiKey, setApiKey] = useState("")
@@ -52,7 +62,7 @@ export default function AIKeyTester() {
   const [model, setModel] = useState("gpt-4o")
   const [customModel, setCustomModel] = useState("")
   const [isCustomModel, setIsCustomModel] = useState(false)
-  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [result, setResult] = useState<{ success: boolean; message: string; details?: any } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const modelOptions = {
@@ -66,6 +76,7 @@ export default function AIKeyTester() {
       "claude-3-haiku-20240307",
       "custom",
     ],
+    huggingface: [],
   }
 
   const handleProviderChange = (value: string) => {
@@ -77,6 +88,8 @@ export default function AIKeyTester() {
       setModel("gemini-1.5-flash")
     } else if (value === "anthropic") {
       setModel("claude-3-7-sonnet-20250219")
+    } else if (value === "huggingface") {
+      setModel("")
     }
 
     setIsCustomModel(false)
@@ -100,6 +113,8 @@ export default function AIKeyTester() {
         return <GoogleLogo />
       case "anthropic":
         return <AnthropicLogo />
+      case "huggingface":
+        return <HuggingFaceLogo />
       default:
         return null
     }
@@ -110,46 +125,66 @@ export default function AIKeyTester() {
     setResult(null)
 
     try {
-      const selectedModel = isCustomModel ? customModel : model
-
-      if (provider === "openai") {
-        const openai = createOpenAI({ apiKey })
-        await generateText({
-          model: openai(selectedModel),
-          prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-          maxTokens: 20,
+      if (provider === "huggingface") {
+        const response = await fetch("https://huggingface.co/api/whoami-v2", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
         })
 
-        setResult({
-          success: true,
-          message: `Connection successful! OpenAI model ${selectedModel} is working.`,
-        })
-      } else if (provider === "google") {
-        await generateText({
-          model: google(selectedModel),
-          prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-          maxTokens: 20,
-        })
+        if (!response.ok) {
+          throw new Error(`Failed to validate HuggingFace token: ${response.statusText}`)
+        }
+
+        const data = await response.json()
 
         setResult({
           success: true,
-          message: `Connection successful! Google model ${selectedModel} is working.`,
-        })
-      } else if (provider === "anthropic") {
-        const anthropic = createAnthropic({ apiKey })
-
-        await generateText({
-          model: anthropic(selectedModel),
-          prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-          maxTokens: 20,
-        })
-
-        setResult({
-          success: true,
-          message: `Connection successful! Anthropic model ${selectedModel} is working.`,
+          message: `Connection successful! Authenticated as ${data.name || data.id || "user"}.`,
+          details: data,
         })
       } else {
-        throw new Error(`Provider ${provider} is not available in this environment`)
+        const selectedModel = isCustomModel ? customModel : model
+
+        if (provider === "openai") {
+          const openai = createOpenAI({ apiKey })
+          await generateText({
+            model: openai(selectedModel),
+            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
+            maxTokens: 20,
+          })
+
+          setResult({
+            success: true,
+            message: `Connection successful! OpenAI model ${selectedModel} is working.`,
+          })
+        } else if (provider === "google") {
+          const googleAI = createGoogleGenerativeAI({ apiKey })
+          await generateText({
+            model: googleAI(selectedModel),
+            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
+            maxTokens: 20,
+          })
+
+          setResult({
+            success: true,
+            message: `Connection successful! Google model ${selectedModel} is working.`,
+          })
+        } else if (provider === "anthropic") {
+          const anthropic = createAnthropic({ apiKey })
+
+          await generateText({
+            model: anthropic(selectedModel),
+            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
+            maxTokens: 20,
+          })
+
+          setResult({
+            success: true,
+            message: `Connection successful! Anthropic model ${selectedModel} is working.`,
+          })
+        }
       }
     } catch (error) {
       setResult({
@@ -169,6 +204,8 @@ export default function AIKeyTester() {
         return "AIza..."
       case "anthropic":
         return "sk-ant-..."
+      case "huggingface":
+        return "hf_..."
       default:
         return "Enter API key"
     }
@@ -182,6 +219,8 @@ export default function AIKeyTester() {
         return "Google AI API Key"
       case "anthropic":
         return "Anthropic API Key"
+      case "huggingface":
+        return "Hugging Face Token"
       default:
         return "API Key"
     }
@@ -192,45 +231,59 @@ export default function AIKeyTester() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>AI API Key Tester</CardTitle>
-          <CardDescription>Test your API keys with OpenAI, Google, or Anthropic</CardDescription>
+          <CardDescription>Test your API keys with OpenAI, Google, Anthropic, or Hugging Face</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4">
-            <div className="space-y-2 w-1/3">
-              <Label htmlFor="provider">Provider</Label>
-              <Select value={provider} onValueChange={handleProviderChange}>
-                <SelectTrigger id="provider" className="text-left">
-                  <SelectValue placeholder="Select provider">
-                    <div className="flex items-center">
-                      {getProviderLogo()}
-                      <span>{provider === "openai" ? "OpenAI" : provider === "google" ? "Google" : "Anthropic"}</span>
-                    </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="openai">
-                    <div className="flex items-center">
-                      <OpenAILogo />
-                      <span>OpenAI</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="google">
-                    <div className="flex items-center">
-                      <GoogleLogo />
-                      <span>Google</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="anthropic">
-                    <div className="flex items-center">
-                      <AnthropicLogo />
-                      <span>Anthropic</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="provider">Provider</Label>
+            <Select value={provider} onValueChange={handleProviderChange}>
+              <SelectTrigger id="provider" className="text-left">
+                <SelectValue placeholder="Select provider">
+                  <div className="flex items-center">
+                    {getProviderLogo()}
+                    <span>
+                      {provider === "openai"
+                        ? "OpenAI"
+                        : provider === "google"
+                          ? "Google"
+                          : provider === "anthropic"
+                            ? "Anthropic"
+                            : "Hugging Face"}
+                    </span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="openai">
+                  <div className="flex items-center">
+                    <OpenAILogo />
+                    <span>OpenAI</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="google">
+                  <div className="flex items-center">
+                    <GoogleLogo />
+                    <span>Google</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="anthropic">
+                  <div className="flex items-center">
+                    <AnthropicLogo />
+                    <span>Anthropic</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="huggingface">
+                  <div className="flex items-center">
+                    <HuggingFaceLogo />
+                    <span>Hugging Face</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="space-y-2 w-2/3">
+          {provider !== "huggingface" && (
+            <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
               <Select value={model} onValueChange={handleModelChange}>
                 <SelectTrigger id="model" className="text-left">
@@ -245,7 +298,7 @@ export default function AIKeyTester() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="api-key">{getApiKeyLabel()}</Label>
@@ -298,6 +351,11 @@ export default function AIKeyTester() {
                     <span className="mr-2">✅</span>Success
                   </AlertTitle>
                   <AlertDescription className="break-words">{result.message}</AlertDescription>
+                  {result.details && provider === "huggingface" && (
+                    <div className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-32">
+                      <pre>{JSON.stringify(result.details, null, 2)}</pre>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -313,12 +371,7 @@ export default function AIKeyTester() {
         <CardFooter>
           <Button
             onClick={testApiKey}
-            disabled={
-              isLoading ||
-              !apiKey ||
-              (isCustomModel && !customModel) ||
-              (provider === "anthropic")
-            }
+            disabled={isLoading || !apiKey || (isCustomModel && !customModel)}
             className="w-full"
           >
             {isLoading ? (
