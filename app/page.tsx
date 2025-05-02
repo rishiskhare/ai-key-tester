@@ -231,7 +231,7 @@ export default function AIKeyTester() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>AI API Key Tester</CardTitle>
-          <CardDescription>Test your API keys with OpenAI, Google, Anthropic, or Hugging Face</CardDescription>
+          <CardDescription>Test your API keys from OpenAI, Google, and Anthropic, as well as tokens from Hugging Face</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
