@@ -47,8 +47,8 @@ const AnthropicLogo = () => (
 
 const HuggingFaceLogo = () => (
   <img
-    src="https://cdn-lfs.hf.co/repos/96/a2/96a2c8468c1546e660ac2609e49404b8588fcf5a748761fa72c154b2836b4c83/942cad1ccda905ac5a659dfd2d78b344fccfb84a8a3ac3721e08f488205638a0?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27hf-logo.svg%3B+filename%3D%22hf-logo.svg%22%3B&response-content-type=image%2Fsvg%2Bxml&Expires=1746221527&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0NjIyMTUyN319LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9yZXBvcy85Ni9hMi85NmEyYzg0NjhjMTU0NmU2NjBhYzI2MDllNDk0MDRiODU4OGZjZjVhNzQ4NzYxZmE3MmMxNTRiMjgzNmI0YzgzLzk0MmNhZDFjY2RhOTA1YWM1YTY1OWRmZDJkNzhiMzQ0ZmNjZmI4NGE4YTNhYzM3MjFlMDhmNDg4MjA1NjM4YTA%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qJnJlc3BvbnNlLWNvbnRlbnQtdHlwZT0qIn1dfQ__&Signature=pUNwgju6Ye7Lcq2qSA-hFii-AD2uOBXu1x6FsOatURl8%7EVd5k4PxOLR3-rdC%7EGzTuA8wEdBqvCRnbbS0NFLCY6TImn29aMXvASOt1jvj8AoJkM1jB6TZc4qfaqXIsXIa7k3xCSmb7LE8rK2YcN76pV36j1q3YbeMCvMLS4ZX7mKZWGGWw2uanbm3dzVKX4P4eVRapMMck%7E5D%7E6VebUr8SHb6qViATRHSQl1zd%7EhcIq18icXroh3Fb2wy-z0qZwlho4JokzlBvR1NvONACwBOrmfSUXi6aveBQF8r1DVv7oWNnPIYhBL-EwctFo6CXM5NK3CoyfpTefISUl5V13tSVA__&Key-Pair-Id=K3RPWS32NSSJCE"
-    alt="HuggingFace Logo"
+    src="https://cdn-lfs.hf.co/repos/96/a2/96a2c8468c1546e660ac2609e49404b8588fcf5a748761fa72c154b2836b4c83/942cad1ccda905ac5a659dfd2d78b344fccfb84a8a3ac3721e08f488205638a0?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27hf-logo.svg%3B+filename%3D%22hf-logo.svg%22%3B&response-content-type=image%2Fsvg%2Bxml&Expires=1746225529&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc0NjIyNTUyOX19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9yZXBvcy85Ni9hMi85NmEyYzg0NjhjMTU0NmU2NjBhYzI2MDllNDk0MDRiODU4OGZjZjVhNzQ4NzYxZmE3MmMxNTRiMjgzNmI0YzgzLzk0MmNhZDFjY2RhOTA1YWM1YTY1OWRmZDJkNzhiMzQ0ZmNjZmI4NGE4YTNhYzM3MjFlMDhmNDg4MjA1NjM4YTA%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qJnJlc3BvbnNlLWNvbnRlbnQtdHlwZT0qIn1dfQ__&Signature=UlVRz9tP9BNQSRr4wC%7Eo7AjPYpTmGPagfXNDtwcWKsFV6s1Lv3b6tO5nvjQE2h5qX5M4zSoZ8XbFor9BJC3sxXev3VUZGQZpRsShZAGQdmv72RpGD1uv-2klrycA28iHOsr6RsNydTBrnC4vhuRjetu2k3uTb8Pbb2gZvlwKi-jWPZ30EVcw1sqk8fx-Sg4HnxAEkNXaaYLgfFK7AYbq4-nbBSEPujGSB64lPFCLFTnFUkaU8cgSJdWZZD5R-5biSqfJYpwAvgzhKQpMM1YCdKKAoOkkI2VM3f%7ESHReqTo%7EXsvfw6kNiQwpsD2KGtPBqJoQpsq8ZmMvkGa%7EufbRiFw__&Key-Pair-Id=K3RPWS32NSSJCE"
+    alt="Hugging Face Logo"
     width={16}
     height={16}
     className="mr-2 flex-shrink-0"
@@ -134,7 +134,7 @@ export default function AIKeyTester() {
         })
 
         if (!response.ok) {
-          throw new Error(`Failed to validate HuggingFace token: ${response.statusText}`)
+          throw new Error(`Failed to validate Hugging Face token: ${response.statusText}`)
         }
 
         const data = await response.json()
