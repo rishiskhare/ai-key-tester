@@ -392,43 +392,43 @@ export default function AIKeyTester() {
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="anthropic" className="flex justify-between items-center">
+                <SelectItem value="anthropic">
                   <div className="flex items-center">
                     <AnthropicLogo />
                     <span>Anthropic</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="google" className="flex justify-between items-center">
+                <SelectItem value="google">
                   <div className="flex items-center">
                     <GoogleLogo />
                     <span>Google</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="huggingface" className="flex justify-between items-center">
+                <SelectItem value="huggingface">
                   <div className="flex items-center">
                     <HuggingFaceLogo />
                     <span>Hugging Face</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="mistral" className="flex justify-between items-center">
+                <SelectItem value="mistral">
                   <div className="flex items-center">
                     <MistralLogo />
                     <span>Mistral AI</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="openai" className="flex justify-between items-center">
+                <SelectItem value="openai">
                   <div className="flex items-center">
                     <OpenAILogo />
                     <span>OpenAI</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="perplexity" className="flex justify-between items-center">
+                <SelectItem value="perplexity">
                   <div className="flex items-center">
                     <PerplexityLogo />
                     <span>Perplexity</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="xai" className="flex justify-between items-center">
+                <SelectItem value="xai">
                   <div className="flex items-center">
                     <XAILogo />
                     <span>xAI Grok</span>
@@ -450,7 +450,7 @@ export default function AIKeyTester() {
                     <SelectItem
                       key={modelOption}
                       value={modelOption}
-                      className="flex justify-between items-center w-full"
+                      className="w-full"
                     >
                       <span>{modelOption}</span>
                     </SelectItem>
