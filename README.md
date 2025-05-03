@@ -2,6 +2,8 @@
 
 AI API Key Tester is an open-source tool for verifying and testing your API keys and access tokens for various AI providers like OpenAI, Google AI, Anthropic, and Hugging Face. It provides a simple, interactive interface to quickly check if your API keys and selected models are working as expected.
 
+https://github.com/user-attachments/assets/9cf8c8f9-219a-4098-a42f-c2b92eb42eb6
+
 ## Features
 
 - **Multi-Provider Support:** Test API keys for OpenAI, Google AI, Anthropic, and tokens for Hugging Face.
