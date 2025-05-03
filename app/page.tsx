@@ -479,6 +479,18 @@ export default function AIKeyTester() {
             </div>
           )}
 
+          {isCustomModel && (
+            <div className="space-y-2">
+              <Label htmlFor="custom-model">Custom Model Name</Label>
+              <Input
+                id="custom-model"
+                placeholder={`Enter ${provider} model name`}
+                value={customModel}
+                onChange={(e) => setCustomModel(e.target.value)}
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="api-key">{getApiKeyLabel()}</Label>
             <div className="relative">
@@ -502,18 +514,6 @@ export default function AIKeyTester() {
               </Button>
             </div>
           </div>
-
-          {isCustomModel && (
-            <div className="space-y-2">
-              <Label htmlFor="custom-model">Custom Model Name</Label>
-              <Input
-                id="custom-model"
-                placeholder={`Enter ${provider} model name`}
-                value={customModel}
-                onChange={(e) => setCustomModel(e.target.value)}
-              />
-            </div>
-          )}
 
           {result && (
             <Alert
