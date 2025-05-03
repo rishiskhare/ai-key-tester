@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Eye, EyeOff } from "lucide-react"
+import { Loader2, Eye, EyeOff, Github } from "lucide-react"
 import { generateText } from "ai"
 import { cn } from "@/lib/utils"
 
@@ -358,14 +358,36 @@ export default function AIKeyTester() {
   return (
     <div className="flex items-center justify-center min-h-screen py-8">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>AI API Key Tester</CardTitle>
-          <CardDescription>
-            Test your API keys from OpenAI, Google, Anthropic, xAI, Perplexity, Mistral, as well as tokens from Hugging
-            Face
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between mb-1">
+            <CardTitle>AI API Key Tester</CardTitle>
+            <a
+              href="https://github.com/rishiskhare/ai-key-tester"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-3 py-1.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors text-sm"
+            >
+              <Github className="w-4 h-4 mr-1.5" />
+              View on GitHub
+            </a>
+          </div>
+          <CardDescription className="mb-4">
+            Locally test your API keys from OpenAI, Anthropic, and more!
           </CardDescription>
+          <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
+            <strong>🔒 Your keys are safe:</strong> All testing occurs entirely in your browser. API keys are never sent
+            to any servers or stored anywhere, and they are discarded once you close or refresh the page. This tool is{" "}
+            <a
+              href="https://github.com/rishiskhare/ai-key-tester"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline font-medium hover:text-blue-600 transition-colors"
+            >
+              open-source
+            </a>{" "} and client-side.
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="provider">Provider</Label>
             <Select value={provider} onValueChange={handleProviderChange}>
@@ -447,11 +469,7 @@ export default function AIKeyTester() {
                 </SelectTrigger>
                 <SelectContent>
                   {modelOptions[provider as keyof typeof modelOptions].map((modelOption) => (
-                    <SelectItem
-                      key={modelOption}
-                      value={modelOption}
-                      className="w-full"
-                    >
+                    <SelectItem key={modelOption} value={modelOption} className="w-full">
                       <span>{modelOption}</span>
                     </SelectItem>
                   ))}
@@ -500,7 +518,7 @@ export default function AIKeyTester() {
             <Alert
               variant={result.success ? "default" : "destructive"}
               className={cn(
-                "overflow-hidden",
+                "overflow-hidden mt-2",
                 result.success && "border-green-500 text-green-700 bg-white",
                 !result.success && "bg-white",
               )}
