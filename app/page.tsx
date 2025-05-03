@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Eye, EyeOff, Github, Check, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Loader2, Eye, EyeOff, Github, Check, X, ChevronUp, ChevronDown } from "lucide-react"
 import { generateText } from "ai"
 import { cn } from "@/lib/utils"
 
@@ -140,7 +140,8 @@ export default function AIKeyTester() {
   const [isLoading, setIsLoading] = useState(false)
   const [successOverlayState, setSuccessOverlayState] = useState<OverlayState>("hidden")
   const [errorOverlayState, setErrorOverlayState] = useState<OverlayState>("hidden")
-  const [showModelResponse, setShowModelResponse] = useState(false)
+  const [safetyInfoExpanded, setSafetyInfoExpanded] = useState(true)
+  const [hasTestedConnection, setHasTestedConnection] = useState(false)
 
   const modelOptions = {
     openai: [
@@ -210,7 +211,6 @@ export default function AIKeyTester() {
 
     setIsCustomModel(false)
     setResult(null)
-    setShowModelResponse(false)
   }
 
   const handleModelChange = (value: string) => {
@@ -260,9 +260,13 @@ export default function AIKeyTester() {
   }
 
   const testApiKey = async () => {
+    if (!hasTestedConnection) {
+      setSafetyInfoExpanded(false)
+      setHasTestedConnection(true)
+    }
+
     setIsLoading(true)
     setResult(null)
-    setShowModelResponse(false)
 
     try {
       if (provider === "huggingface") {
@@ -446,10 +450,6 @@ export default function AIKeyTester() {
     }
   }
 
-  const toggleModelResponse = () => {
-    setShowModelResponse(!showModelResponse)
-  }
-
   return (
     <div className="flex items-center justify-center min-h-screen py-8">
       <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
@@ -470,18 +470,48 @@ export default function AIKeyTester() {
           <CardDescription className="mb-4">
             Locally test your API keys from OpenAI, Anthropic, and more!
           </CardDescription>
-          <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
-            <strong>🔒 Your keys are safe:</strong> All testing occurs entirely in your browser. API keys are never sent
-            to any servers or stored, and they are discarded once you close or refresh the page. This project is{" "}
-            <a
-              href="https://github.com/rishiskhare/ai-key-tester"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline font-medium hover:text-blue-600 transition-colors"
+          <div
+            className={cn(
+              "mt-2 rounded-md transition-all duration-200 bg-blue-50 text-blue-800",
+              safetyInfoExpanded ? "" : "hover:bg-blue-100",
+            )}
+          >
+            <div
+              className={cn(
+                "flex items-center justify-between cursor-pointer transition-colors",
+                safetyInfoExpanded ? "px-3 pt-3 pb-0" : "p-3",
+              )}
+              onClick={() => setSafetyInfoExpanded(!safetyInfoExpanded)}
             >
-              open-source
-            </a>{" "}
-            and client-side.
+              <div className="flex items-center">
+                <span className="mr-2">🔒</span>
+                <span className="text-sm font-medium">Your keys are safe</span>
+                {!safetyInfoExpanded && <span className="ml-2 text-xs text-blue-600">(read more)</span>}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+              >
+                {safetyInfoExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              </Button>
+            </div>
+
+            {safetyInfoExpanded && (
+              <div className="px-3 pt-1 pb-3 text-sm">
+                All testing occurs entirely in your browser. API keys are never sent to any servers or stored, and they
+                are discarded once you close or refresh the page. This project is{" "}
+                <a
+                  href="https://github.com/rishiskhare/ai-key-tester"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium hover:text-blue-600 transition-colors"
+                >
+                  open-source
+                </a>{" "}
+                and client-side.
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -611,71 +641,39 @@ export default function AIKeyTester() {
             </div>
           </div>
 
-          {result && (
-            <Alert
-              variant={result.success ? "default" : "destructive"}
-              className={cn(
-                "overflow-hidden mt-2",
-                result.success && "border-green-500 text-green-700 bg-white",
-                !result.success && "bg-white",
+          {result && result.success ? (
+            <Alert variant="default" className="overflow-hidden mt-2 border-green-500 text-green-700 bg-white">
+              <AlertTitle className="flex items-center">
+                <span className="mr-2">✅</span>Connection successful
+              </AlertTitle>
+
+              {result.details && provider === "huggingface" && (
+                <div className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-32">
+                  <pre>{JSON.stringify(result.details, null, 2)}</pre>
+                </div>
               )}
-            >
-              {result.success ? (
-                <>
-                  <AlertTitle className="flex items-center">
-                    <span className="mr-2">✅</span>Success
-                  </AlertTitle>
-                  <AlertDescription className="break-words">{result.message}</AlertDescription>
 
-                  {result.details && provider === "huggingface" && (
-                    <div className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-32">
-                      <pre>{JSON.stringify(result.details, null, 2)}</pre>
-                    </div>
-                  )}
-
-                  {result.modelResponse && (
-                    <div className="mt-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={toggleModelResponse}
-                        className="w-full flex items-center justify-center text-sm"
-                      >
-                        {showModelResponse ? "Hide model response" : "See model response"}
-                        {showModelResponse ? (
-                          <ChevronUp className="ml-2 h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="ml-2 h-4 w-4" />
-                        )}
-                      </Button>
-
-                      {showModelResponse && (
-                        <div className="mt-3 text-sm border rounded-md overflow-hidden">
-                          <div className="bg-gray-50 p-3 border-b">
-                            <strong>Prompt:</strong>
-                            <div className="mt-1 font-mono text-xs">{result.modelResponse.prompt}</div>
-                          </div>
-                          <div className="p-3">
-                            <strong>Response:</strong>
-                            <div className="mt-1 font-mono text-xs whitespace-pre-wrap">
-                              {result.modelResponse.response}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <AlertTitle className="flex items-center">
-                    <span className="mr-2">❌</span>Error
-                  </AlertTitle>
-                  <AlertDescription className="break-words">{result.message}</AlertDescription>
-                </>
+              {result.modelResponse && (
+                <div className="mt-3 text-sm border rounded-md overflow-hidden">
+                  <div className="bg-gray-50 p-3 border-b">
+                    <strong>Prompt:</strong>
+                    <span className="font-mono text-xs"> {result.modelResponse.prompt}</span>
+                  </div>
+                  <div className="p-3">
+                    <strong>Response:</strong>
+                    <span className="font-mono text-xs whitespace-pre-wrap"> {result.modelResponse.response}</span>
+                  </div>
+                </div>
               )}
             </Alert>
-          )}
+          ) : result && !result.success ? (
+            <Alert variant="destructive" className="overflow-hidden mt-2 bg-white">
+              <AlertTitle className="flex items-center">
+                <span className="mr-2">❌</span>Error
+              </AlertTitle>
+              <AlertDescription className="break-words">{result.message}</AlertDescription>
+            </Alert>
+          ) : null}
         </CardContent>
         <CardFooter>
           <Button
