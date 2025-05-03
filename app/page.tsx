@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils"
 import { createOpenAI } from "@ai-sdk/openai"
 import { createAnthropic } from "@ai-sdk/anthropic"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
+import { createXai } from "@ai-sdk/xai"
+import { createPerplexity } from "@ai-sdk/perplexity"
+import { createMistral } from "@ai-sdk/mistral"
 
 const OpenAILogo = () => (
   <img
@@ -55,41 +58,110 @@ const HuggingFaceLogo = () => (
   />
 )
 
+const XAILogo = () => (
+  <img
+    src="https://cdn.brandfetch.io/iddjpnb3_W/theme/dark/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B"
+    alt="xAI Grok Logo"
+    width={16}
+    height={16}
+    className="mr-2 flex-shrink-0"
+  />
+)
+
+const PerplexityLogo = () => (
+  <img
+    src="https://cdn.brandfetch.io/idNdawywEZ/w/800/h/800/theme/dark/idy0gCuAWE.png?c=1dxbfHSJFAPEGdCLU4o5B"
+    alt="Perplexity Logo"
+    width={16}
+    height={16}
+    className="mr-2 flex-shrink-0"
+  />
+)
+
+const MistralLogo = () => (
+  <img
+    src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Mistral_AI_logo_%282025%E2%80%93%29.svg"
+    alt="Mistral AI Logo"
+    width={16}
+    height={16}
+    className="mr-2 flex-shrink-0"
+  />
+)
+
 export default function AIKeyTester() {
   const [provider, setProvider] = useState("openai")
   const [apiKey, setApiKey] = useState("")
   const [showApiKey, setShowApiKey] = useState(false)
-  const [model, setModel] = useState("gpt-4o")
+  const [model, setModel] = useState("gpt-4.1-nano")
   const [customModel, setCustomModel] = useState("")
   const [isCustomModel, setIsCustomModel] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string; details?: any } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const modelOptions = {
-    openai: ["o4-mini", "o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo", "gpt-3.5-turbo-16k", "custom"],
-    google: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash", "gemini-1.0-pro", "custom"],
+    openai: [
+      "gpt-4.1",
+      "gpt-4.1-mini",
+      "gpt-4.1-nano",
+      "gpt-4o",
+      "gpt-4o-mini",
+      "gpt-4-turbo",
+      "gpt-4",
+      "gpt-3.5-turbo",
+      "o1",
+      "o1-mini",
+      "o1-preview",
+      "o3-mini",
+      "o3",
+      "o4-mini",
+      "chatgpt-4o-latest",
+      "custom",
+    ],
+    google: [
+      "gemini-2.5-flash-preview-04-17",
+      "gemini-2.5-pro-exp-03-25",
+      "gemini-2.0-flash",
+      "gemini-1.5-pro",
+      "gemini-1.5-pro-latest",
+      "gemini-1.5-flash",
+      "gemini-1.5-flash-latest",
+      "gemini-1.5-flash-8b",
+      "gemini-1.5-flash-8b-latest",
+      "custom",
+    ],
     anthropic: [
       "claude-3-7-sonnet-20250219",
+      "claude-3-5-sonnet-20241022",
       "claude-3-5-sonnet-20240620",
+      "claude-3-5-haiku-20241022",
       "claude-3-opus-20240229",
       "claude-3-sonnet-20240229",
       "claude-3-haiku-20240307",
       "custom",
     ],
     huggingface: [],
+    xai: ["grok-3", "grok-3-fast", "grok-3-mini", "grok-3-mini-fast", "grok-2-1212", "grok-beta", "custom"],
+    perplexity: ["sonar-pro", "sonar", "sonar-deep-research", "custom"],
+    mistral: ["mistral-large-latest", "mistral-small-latest", "ministral-3b-latest", "ministral-8b-latest", "custom"],
   }
 
   const handleProviderChange = (value: string) => {
     setProvider(value)
 
     if (value === "openai") {
-      setModel("gpt-4o")
+      setModel("gpt-4.1-nano")
     } else if (value === "google") {
-      setModel("gemini-1.5-flash")
+      setModel("gemini-2.0-flash")
     } else if (value === "anthropic") {
       setModel("claude-3-7-sonnet-20250219")
     } else if (value === "huggingface") {
       setModel("")
+    } else if (value === "xai") {
+      setModel("grok-3")
+    } else if (value === "perplexity") {
+      setModel("sonar-pro")
+    } else if (value === "mistral") {
+      setModel("mistral-large-latest")
     }
 
     setIsCustomModel(false)
@@ -115,6 +187,12 @@ export default function AIKeyTester() {
         return <AnthropicLogo />
       case "huggingface":
         return <HuggingFaceLogo />
+      case "xai":
+        return <XAILogo />
+      case "perplexity":
+        return <PerplexityLogo />
+      case "mistral":
+        return <MistralLogo />
       default:
         return null
     }
@@ -184,6 +262,45 @@ export default function AIKeyTester() {
             success: true,
             message: `Connection successful! Anthropic model ${selectedModel} is working.`,
           })
+        } else if (provider === "xai") {
+          const xai = createXai({ apiKey })
+
+          await generateText({
+            model: xai(selectedModel),
+            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
+            maxTokens: 20,
+          })
+
+          setResult({
+            success: true,
+            message: `Connection successful! xAI Grok model ${selectedModel} is working.`,
+          })
+        } else if (provider === "perplexity") {
+          const perplexity = createPerplexity({ apiKey })
+
+          await generateText({
+            model: perplexity(selectedModel),
+            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
+            maxTokens: 20,
+          })
+
+          setResult({
+            success: true,
+            message: `Connection successful! Perplexity model ${selectedModel} is working.`,
+          })
+        } else if (provider === "mistral") {
+          const mistral = createMistral({ apiKey })
+
+          await generateText({
+            model: mistral(selectedModel),
+            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
+            maxTokens: 20,
+          })
+
+          setResult({
+            success: true,
+            message: `Connection successful! Mistral AI model ${selectedModel} is working.`,
+          })
         }
       }
     } catch (error) {
@@ -206,6 +323,12 @@ export default function AIKeyTester() {
         return "sk-ant-..."
       case "huggingface":
         return "hf_..."
+      case "xai":
+        return "xai-..."
+      case "perplexity":
+        return "pplx-..."
+      case "mistral":
+        return "..."
       default:
         return "Enter API key"
     }
@@ -221,6 +344,12 @@ export default function AIKeyTester() {
         return "Anthropic API Key"
       case "huggingface":
         return "Hugging Face Token"
+      case "xai":
+        return "xAI API Key"
+      case "perplexity":
+        return "Perplexity API Key"
+      case "mistral":
+        return "Mistral AI API Key"
       default:
         return "API Key"
     }
@@ -231,7 +360,10 @@ export default function AIKeyTester() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>AI API Key Tester</CardTitle>
-          <CardDescription>Test your API keys from OpenAI, Google, and Anthropic, as well as tokens from Hugging Face</CardDescription>
+          <CardDescription>
+            Test your API keys from OpenAI, Google, Anthropic, xAI, Perplexity, Mistral, as well as tokens from Hugging
+            Face
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -248,34 +380,58 @@ export default function AIKeyTester() {
                           ? "Google"
                           : provider === "anthropic"
                             ? "Anthropic"
-                            : "Hugging Face"}
+                            : provider === "huggingface"
+                              ? "Hugging Face"
+                              : provider === "xai"
+                                ? "xAI Grok"
+                                : provider === "perplexity"
+                                  ? "Perplexity"
+                                  : "Mistral AI"}
                     </span>
                   </div>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="openai">
-                  <div className="flex items-center">
-                    <OpenAILogo />
-                    <span>OpenAI</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="google">
-                  <div className="flex items-center">
-                    <GoogleLogo />
-                    <span>Google</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="anthropic">
+                <SelectItem value="anthropic" className="flex justify-between items-center">
                   <div className="flex items-center">
                     <AnthropicLogo />
                     <span>Anthropic</span>
                   </div>
                 </SelectItem>
-                <SelectItem value="huggingface">
+                <SelectItem value="google" className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <GoogleLogo />
+                    <span>Google</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="huggingface" className="flex justify-between items-center">
                   <div className="flex items-center">
                     <HuggingFaceLogo />
                     <span>Hugging Face</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="mistral" className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <MistralLogo />
+                    <span>Mistral AI</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="openai" className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <OpenAILogo />
+                    <span>OpenAI</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="perplexity" className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <PerplexityLogo />
+                    <span>Perplexity</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="xai" className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <XAILogo />
+                    <span>xAI Grok</span>
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -291,8 +447,12 @@ export default function AIKeyTester() {
                 </SelectTrigger>
                 <SelectContent>
                   {modelOptions[provider as keyof typeof modelOptions].map((modelOption) => (
-                    <SelectItem key={modelOption} value={modelOption} className="w-full">
-                      {modelOption}
+                    <SelectItem
+                      key={modelOption}
+                      value={modelOption}
+                      className="flex justify-between items-center w-full"
+                    >
+                      <span>{modelOption}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
