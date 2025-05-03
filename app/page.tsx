@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Eye, EyeOff, Github } from "lucide-react"
+import { Loader2, Eye, EyeOff, Github, Check, X, ChevronDown, ChevronUp } from "lucide-react"
 import { generateText } from "ai"
 import { cn } from "@/lib/utils"
 
@@ -88,6 +88,47 @@ const MistralLogo = () => (
   />
 )
 
+const animationStyles = `
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-fade-out {
+    animation: fadeOut 0.5s ease-in-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+`
+
+type OverlayState = "hidden" | "visible" | "fading"
+
+interface TestResult {
+  success: boolean
+  message: string
+  details?: any
+  modelResponse?: {
+    prompt: string
+    response: string
+  }
+}
+
 export default function AIKeyTester() {
   const [provider, setProvider] = useState("openai")
   const [apiKey, setApiKey] = useState("")
@@ -95,8 +136,11 @@ export default function AIKeyTester() {
   const [model, setModel] = useState("gpt-4.1-nano")
   const [customModel, setCustomModel] = useState("")
   const [isCustomModel, setIsCustomModel] = useState(false)
-  const [result, setResult] = useState<{ success: boolean; message: string; details?: any } | null>(null)
+  const [result, setResult] = useState<TestResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [successOverlayState, setSuccessOverlayState] = useState<OverlayState>("hidden")
+  const [errorOverlayState, setErrorOverlayState] = useState<OverlayState>("hidden")
+  const [showModelResponse, setShowModelResponse] = useState(false)
 
   const modelOptions = {
     openai: [
@@ -166,6 +210,7 @@ export default function AIKeyTester() {
 
     setIsCustomModel(false)
     setResult(null)
+    setShowModelResponse(false)
   }
 
   const handleModelChange = (value: string) => {
@@ -198,9 +243,26 @@ export default function AIKeyTester() {
     }
   }
 
+  const showSuccessAnimation = () => {
+    setSuccessOverlayState("visible")
+    setTimeout(() => {
+      setSuccessOverlayState("fading")
+      setTimeout(() => setSuccessOverlayState("hidden"), 500)
+    }, 800)
+  }
+
+  const showErrorAnimation = () => {
+    setErrorOverlayState("visible")
+    setTimeout(() => {
+      setErrorOverlayState("fading")
+      setTimeout(() => setErrorOverlayState("hidden"), 500)
+    }, 800)
+  }
+
   const testApiKey = async () => {
     setIsLoading(true)
     setResult(null)
+    setShowModelResponse(false)
 
     try {
       if (provider === "huggingface") {
@@ -222,85 +284,113 @@ export default function AIKeyTester() {
           message: `Connection successful! Authenticated as ${data.name || data.id || "user"}.`,
           details: data,
         })
+        showSuccessAnimation()
       } else {
         const selectedModel = isCustomModel ? customModel : model
+        const testPrompt = "Hello, please respond with a simple confirmation if you can read this message."
 
         if (provider === "openai") {
           const openai = createOpenAI({ apiKey })
-          await generateText({
+          const { text } = await generateText({
             model: openai(selectedModel),
-            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-            maxTokens: 20,
+            prompt: testPrompt,
+            maxTokens: 100,
           })
 
           setResult({
             success: true,
             message: `Connection successful! OpenAI model ${selectedModel} is working.`,
+            modelResponse: {
+              prompt: testPrompt,
+              response: text,
+            },
           })
+          showSuccessAnimation()
         } else if (provider === "google") {
           const googleAI = createGoogleGenerativeAI({ apiKey })
-          await generateText({
+          const { text } = await generateText({
             model: googleAI(selectedModel),
-            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-            maxTokens: 20,
+            prompt: testPrompt,
+            maxTokens: 100,
           })
 
           setResult({
             success: true,
             message: `Connection successful! Google model ${selectedModel} is working.`,
+            modelResponse: {
+              prompt: testPrompt,
+              response: text,
+            },
           })
+          showSuccessAnimation()
         } else if (provider === "anthropic") {
           const anthropic = createAnthropic({ apiKey })
-
-          await generateText({
+          const { text } = await generateText({
             model: anthropic(selectedModel),
-            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-            maxTokens: 20,
+            prompt: testPrompt,
+            maxTokens: 100,
           })
 
           setResult({
             success: true,
             message: `Connection successful! Anthropic model ${selectedModel} is working.`,
+            modelResponse: {
+              prompt: testPrompt,
+              response: text,
+            },
           })
+          showSuccessAnimation()
         } else if (provider === "xai") {
           const xai = createXai({ apiKey })
-
-          await generateText({
+          const { text } = await generateText({
             model: xai(selectedModel),
-            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-            maxTokens: 20,
+            prompt: testPrompt,
+            maxTokens: 100,
           })
 
           setResult({
             success: true,
             message: `Connection successful! xAI Grok model ${selectedModel} is working.`,
+            modelResponse: {
+              prompt: testPrompt,
+              response: text,
+            },
           })
+          showSuccessAnimation()
         } else if (provider === "perplexity") {
           const perplexity = createPerplexity({ apiKey })
-
-          await generateText({
+          const { text } = await generateText({
             model: perplexity(selectedModel),
-            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-            maxTokens: 20,
+            prompt: testPrompt,
+            maxTokens: 100,
           })
 
           setResult({
             success: true,
             message: `Connection successful! Perplexity model ${selectedModel} is working.`,
+            modelResponse: {
+              prompt: testPrompt,
+              response: text,
+            },
           })
+          showSuccessAnimation()
         } else if (provider === "mistral") {
           const mistral = createMistral({ apiKey })
-
-          await generateText({
+          const { text } = await generateText({
             model: mistral(selectedModel),
-            prompt: "Hello, please respond with a simple confirmation if you can read this message.",
-            maxTokens: 20,
+            prompt: testPrompt,
+            maxTokens: 100,
           })
 
           setResult({
             success: true,
             message: `Connection successful! Mistral AI model ${selectedModel} is working.`,
+            modelResponse: {
+              prompt: testPrompt,
+              response: text,
+            },
           })
+          showSuccessAnimation()
         }
       }
     } catch (error) {
@@ -308,6 +398,7 @@ export default function AIKeyTester() {
         success: false,
         message: error instanceof Error ? error.message : "An unknown error occurred",
       })
+      showErrorAnimation()
     } finally {
       setIsLoading(false)
     }
@@ -355,8 +446,13 @@ export default function AIKeyTester() {
     }
   }
 
+  const toggleModelResponse = () => {
+    setShowModelResponse(!showModelResponse)
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen py-8">
+      <style dangerouslySetInnerHTML={{ __html: animationStyles }} />
       <Card className="w-full max-w-md">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between mb-1">
@@ -384,8 +480,8 @@ export default function AIKeyTester() {
               className="underline font-medium hover:text-blue-600 transition-colors"
             >
               open-source
-            </a>
-            {" "}and client-side.
+            </a>{" "}
+            and client-side.
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -530,9 +626,43 @@ export default function AIKeyTester() {
                     <span className="mr-2">✅</span>Success
                   </AlertTitle>
                   <AlertDescription className="break-words">{result.message}</AlertDescription>
+
                   {result.details && provider === "huggingface" && (
                     <div className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-auto max-h-32">
                       <pre>{JSON.stringify(result.details, null, 2)}</pre>
+                    </div>
+                  )}
+
+                  {result.modelResponse && (
+                    <div className="mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleModelResponse}
+                        className="w-full flex items-center justify-center text-sm"
+                      >
+                        {showModelResponse ? "Hide model response" : "See model response"}
+                        {showModelResponse ? (
+                          <ChevronUp className="ml-2 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-2 h-4 w-4" />
+                        )}
+                      </Button>
+
+                      {showModelResponse && (
+                        <div className="mt-3 text-sm border rounded-md overflow-hidden">
+                          <div className="bg-gray-50 p-3 border-b">
+                            <strong>Prompt:</strong>
+                            <div className="mt-1 font-mono text-xs">{result.modelResponse.prompt}</div>
+                          </div>
+                          <div className="p-3">
+                            <strong>Response:</strong>
+                            <div className="mt-1 font-mono text-xs whitespace-pre-wrap">
+                              {result.modelResponse.response}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -564,6 +694,34 @@ export default function AIKeyTester() {
           </Button>
         </CardFooter>
       </Card>
+
+      {successOverlayState !== "hidden" && (
+        <div
+          className={cn(
+            "fixed inset-0 bg-green-500 bg-opacity-90 flex items-center justify-center z-50",
+            successOverlayState === "visible" && "animate-fade-in",
+            successOverlayState === "fading" && "animate-fade-out",
+          )}
+        >
+          <div className="text-white">
+            <Check className="h-24 w-24 animate-scale-in" strokeWidth={3} />
+          </div>
+        </div>
+      )}
+
+      {errorOverlayState !== "hidden" && (
+        <div
+          className={cn(
+            "fixed inset-0 bg-red-500 bg-opacity-90 flex items-center justify-center z-50",
+            errorOverlayState === "visible" && "animate-fade-in",
+            errorOverlayState === "fading" && "animate-fade-out",
+          )}
+        >
+          <div className="text-white">
+            <X className="h-24 w-24 animate-scale-in" strokeWidth={3} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
