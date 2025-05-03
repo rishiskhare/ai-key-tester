@@ -4,7 +4,7 @@ This is an open-source project for securely and locally verifying and testing yo
 
 https://github.com/user-attachments/assets/9cf8c8f9-219a-4098-a42f-c2b92eb42eb6
 
-## Features
+## 🚀 Features
 
 - **Multi-Provider Support:** Test API keys for OpenAI, Google AI, Anthropic, and tokens for Hugging Face.
 - **Model Selection:** Choose from a set of predefined models (or enter a custom model for some providers).
@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/9cf8c8f9-219a-4098-a42f-c2b92eb42eb6
 - **Clean UI:** Built using modern components and Tailwind CSS for a responsive design.
 - **Client-side Operation:** All API key testing is performed entirely in the browser.
 
-## Privacy and Security
+## 🔒 Privacy and Security
 
 - **Open-Source:** This project is fully open-source. You can review the entire codebase to verify its integrity.
 - **No Storage of API Keys:** All API key operations are executed client-side. Your API keys are used only for immediate testing and are never stored or transmitted to a backend server.
