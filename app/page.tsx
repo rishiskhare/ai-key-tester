@@ -376,7 +376,7 @@ export default function AIKeyTester() {
           </CardDescription>
           <div className="p-3 bg-blue-50 text-blue-800 rounded-md text-sm">
             <strong>🔒 Your keys are safe:</strong> All testing occurs entirely in your browser. API keys are never sent
-            to any servers or stored, and they are discarded once you close or refresh the page. This project is
+            to any servers or stored, and they are discarded once you close or refresh the page. This project is{" "}
             <a
               href="https://github.com/rishiskhare/ai-key-tester"
               target="_blank"
@@ -384,7 +384,8 @@ export default function AIKeyTester() {
               className="underline font-medium hover:text-blue-600 transition-colors"
             >
               open-source
-            </a> and client-side.
+            </a>
+            {" "}and client-side.
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
