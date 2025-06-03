@@ -461,7 +461,7 @@ export default function AIKeyTester() {
               href="https://github.com/rishiskhare/ai-key-tester"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center px-3 py-1.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 text-sm"
+              className="flex items-center px-3 py-1.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors text-sm"
             >
               <Github className="w-4 h-4 mr-1.5" />
               View on GitHub
