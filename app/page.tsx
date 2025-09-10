@@ -133,62 +133,13 @@ export default function AIKeyTester() {
   const [provider, setProvider] = useState("openai")
   const [apiKey, setApiKey] = useState("")
   const [showApiKey, setShowApiKey] = useState(false)
-  const [model, setModel] = useState("gpt-4.1-nano")
-  const [customModel, setCustomModel] = useState("")
-  const [isCustomModel, setIsCustomModel] = useState(false)
+  const [model, setModel] = useState("")
   const [result, setResult] = useState<TestResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [successOverlayState, setSuccessOverlayState] = useState<OverlayState>("hidden")
   const [errorOverlayState, setErrorOverlayState] = useState<OverlayState>("hidden")
   const [safetyInfoExpanded, setSafetyInfoExpanded] = useState(true)
   const [hasTestedConnection, setHasTestedConnection] = useState(false)
-
-  const modelOptions = {
-    openai: [
-      "gpt-4.1",
-      "gpt-4.1-mini",
-      "gpt-4.1-nano",
-      "gpt-4o",
-      "gpt-4o-mini",
-      "gpt-4-turbo",
-      "gpt-4",
-      "gpt-3.5-turbo",
-      "o1",
-      "o1-mini",
-      "o1-preview",
-      "o3-mini",
-      "o3",
-      "o4-mini",
-      "chatgpt-4o-latest",
-      "custom",
-    ],
-    google: [
-      "gemini-2.5-flash-preview-04-17",
-      "gemini-2.5-pro-exp-03-25",
-      "gemini-2.0-flash",
-      "gemini-1.5-pro",
-      "gemini-1.5-pro-latest",
-      "gemini-1.5-flash",
-      "gemini-1.5-flash-latest",
-      "gemini-1.5-flash-8b",
-      "gemini-1.5-flash-8b-latest",
-      "custom",
-    ],
-    anthropic: [
-      "claude-3-7-sonnet-20250219",
-      "claude-3-5-sonnet-20241022",
-      "claude-3-5-sonnet-20240620",
-      "claude-3-5-haiku-20241022",
-      "claude-3-opus-20240229",
-      "claude-3-sonnet-20240229",
-      "claude-3-haiku-20240307",
-      "custom",
-    ],
-    huggingface: [],
-    xai: ["grok-3", "grok-3-fast", "grok-3-mini", "grok-3-mini-fast", "grok-2-1212", "grok-beta", "custom"],
-    perplexity: ["sonar-pro", "sonar", "sonar-deep-research", "custom"],
-    mistral: ["mistral-large-latest", "mistral-small-latest", "ministral-3b-latest", "ministral-8b-latest", "custom"],
-  }
 
   const handleProviderChange = (value: string) => {
     setProvider(value)
@@ -208,14 +159,11 @@ export default function AIKeyTester() {
     } else if (value === "mistral") {
       setModel("mistral-large-latest")
     }
-
-    setIsCustomModel(false)
     setResult(null)
   }
 
   const handleModelChange = (value: string) => {
     setModel(value)
-    setIsCustomModel(value === "custom")
   }
 
   const toggleApiKeyVisibility = () => {
@@ -290,7 +238,7 @@ export default function AIKeyTester() {
         })
         showSuccessAnimation()
       } else {
-        const selectedModel = isCustomModel ? customModel : model
+        const selectedModel = model
         const testPrompt = "Hello, please respond with a simple confirmation if you can read this message."
 
         if (provider === "openai") {
@@ -590,32 +538,15 @@ export default function AIKeyTester() {
           {provider !== "huggingface" && (
             <div className="space-y-2">
               <Label htmlFor="model">Model</Label>
-              <Select value={model} onValueChange={handleModelChange}>
-                <SelectTrigger id="model" className="text-left">
-                  <SelectValue placeholder="Select a model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {modelOptions[provider as keyof typeof modelOptions].map((modelOption) => (
-                    <SelectItem key={modelOption} value={modelOption} className="w-full">
-                      <span>{modelOption}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {isCustomModel && (
-            <div className="space-y-2">
-              <Label htmlFor="custom-model">Custom Model Name</Label>
               <Input
-                id="custom-model"
+                id="model"
                 placeholder={`Enter ${provider} model name`}
-                value={customModel}
-                onChange={(e) => setCustomModel(e.target.value)}
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
               />
             </div>
           )}
+
 
           <div className="space-y-2">
             <Label htmlFor="api-key">{getApiKeyLabel()}</Label>
@@ -678,7 +609,7 @@ export default function AIKeyTester() {
         <CardFooter>
           <Button
             onClick={testApiKey}
-            disabled={isLoading || !apiKey || (isCustomModel && !customModel)}
+            disabled={isLoading || !apiKey || (provider !== "huggingface" && !model)}
             className="w-full"
           >
             {isLoading ? (
